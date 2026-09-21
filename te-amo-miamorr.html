@@ -86,10 +86,30 @@
   }
 
   .say{
+    position:relative;
     display:flex;align-items:center;justify-content:center;
     padding:calc(2.4rem + env(safe-area-inset-top,0px)) 1.6rem .8rem;
   }
+  #heart{
+    position:absolute;left:50%;top:50%;z-index:0;pointer-events:none;
+    width:min(82vw,400px);
+    transform:translate(-50%,-50%) scale(.55);opacity:0;
+    filter:drop-shadow(0 12px 40px rgba(199,27,56,.45));
+    transition:opacity .9s ease, transform 1s cubic-bezier(.22,1.25,.4,1);
+  }
+  #heart.on{
+    opacity:1;transform:translate(-50%,-50%) scale(1);
+    animation:beat 3s ease-in-out 1.2s infinite;
+  }
+  @keyframes beat{
+    0%,100%{transform:translate(-50%,-50%) scale(1);}
+    10%{transform:translate(-50%,-50%) scale(1.055);}
+    20%{transform:translate(-50%,-50%) scale(1.012);}
+    30%{transform:translate(-50%,-50%) scale(1.038);}
+    45%{transform:translate(-50%,-50%) scale(1);}
+  }
   #msg{
+    position:relative;z-index:1;
     font-family:Fraunces,Georgia,serif;font-weight:300;
     font-size:clamp(1.3rem,6vw,1.95rem);line-height:1.38;
     margin:0;max-width:20ch;text-align:center;
@@ -98,7 +118,7 @@
   }
   #msg.on{opacity:1;transform:translateY(0);}
   #msg.long{font-size:clamp(1.12rem,5vw,1.6rem);max-width:22ch;}
-  #msg.last{font-size:clamp(1.5rem,7.2vw,2.2rem);max-width:18ch;}
+  #msg.last{font-size:clamp(1.45rem,6.6vw,2rem);max-width:13ch;text-shadow:0 2px 14px rgba(90,4,20,.5);}
 
   .vase{position:relative;overflow:visible;}
   .vase svg{display:block;width:100%;height:100%;overflow:visible;position:relative;z-index:1;}
@@ -180,6 +200,7 @@
   @keyframes fall{to{transform:translateY(124vh) rotate(520deg);opacity:.1;}}
 
   @media (prefers-reduced-motion: reduce){
+    #heart.on{animation:none;}
     .petal{display:none;}
     .stem-line{stroke-dashoffset:0 !important;animation:none;}
     .head{transform:scale(1);animation:none;}
@@ -205,7 +226,19 @@
   </section>
 
   <section id="scene">
-    <div class="say"><p id="msg" aria-live="polite"></p></div>
+    <div class="say">
+      <svg id="heart" viewBox="0 0 100 92" aria-hidden="true">
+        <defs>
+          <radialGradient id="hg" cx="36%" cy="30%" r="78%">
+            <stop offset="0%" stop-color="#E8465F"/>
+            <stop offset="55%" stop-color="#C71B38"/>
+            <stop offset="100%" stop-color="#8A0A24"/>
+          </radialGradient>
+        </defs>
+        <path d="M50 89 C20 67 3 48 3 29 C3 13 15 3 28 3 C38 3 46 9 50 17 C54 9 62 3 72 3 C85 3 97 13 97 29 C97 48 80 67 50 89Z" fill="url(#hg)"/>
+      </svg>
+      <p id="msg" aria-live="polite"></p>
+    </div>
     <div class="vase">
       <div id="glow"></div>
       <svg viewBox="0 0 460 490" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
@@ -302,20 +335,22 @@
   var MESSAGES = [
     "No estoy con vos ahora asique estas son las flores que te puedo mandar",
     "Porque hay cosas que quiero que sepas",
-    "Sos adictiva, nunca me voy a cansar de vos",
-    "No entiendo qué es lo que tenés, pero me encanta",
+    "Hay algo que tenés, no entiendo qué, pero me encanta",
+    "Sos literalmente adictiva, nunca me voy a cansar de vos",
     "Si pudiera estar 24/7 con vos lo haría",
     "Me encanta salir con vos",
     "Amo que puedas confiar en mí para todo",
     "Amo tu intensidad y tu forma de amarme",
+    "Amo cómo valorás mis cosas y te gusta todo de mí",
     "Amo tu estilo",
-    "Amo tu sonrisa, tus labios",
+    "Amo tu boca, tu sonrisa, tus labios",
     "Amo cada parte de tu personalidad",
+    "Amo cada parte de vos",
     "Realmente me volvés loco",
     "Sos todo lo que quiero para mí",
     "Nunca van a alcanzar las flores para que entiendas lo que me pasa con vos",
     "Y esta última es una rosa, que sé que te encantan",
-    "Te amo hoy y siempre, gordita mía"
+    "Te amo hoy y siempre, gordita"
   ];
 
   // 14 flores amarillas + la rosa al frente. La última frase no lleva flor.
@@ -334,6 +369,8 @@
     {x:124, y:340, s:0.75, r:  6, sq:0.98, c:"#F5B421"},
     {x:358, y:344, s:0.77, r:-10, sq:0.93, c:"#FFC83D"},
     {x:250, y:346, s:0.84, r: 16, sq:1.00, c:"#FFD65A"},
+    {x:148, y:228, s:0.70, r:-19, sq:0.94, c:"#FFD86A"},
+    {x:318, y:210, s:0.72, r: 21, sq:0.92, c:"#F7B922"},
     {x:228, y:202, s:1.14, r: -5, sq:1.00, rose:true}
   ];
 
@@ -350,6 +387,7 @@
   var heads  = document.getElementById('heads');
   var wrap   = document.getElementById('wrap');
   var msg    = document.getElementById('msg');
+  var heart  = document.getElementById('heart');
   var bar    = document.getElementById('bar');
   var hint   = document.getElementById('hint');
   var cue    = document.getElementById('cue');
@@ -402,6 +440,7 @@
       msg.textContent = MESSAGES[n];
       var last = n === MESSAGES.length - 1;
       msg.classList.toggle('last', last);
+      heart.classList.toggle('on', last);
       msg.classList.toggle('long', !last && MESSAGES[n].length > 46);
       msg.classList.add('on');
     }, n === 0 ? 40 : 380);
@@ -513,6 +552,7 @@
     hint.classList.add('gone');
     bar.style.width = '0%';
     msg.classList.remove('on');
+    heart.classList.remove('on');
     i = 0; busy = false;
     tap.hidden = false;
     setTimeout(step, 450);
