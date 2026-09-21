@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para vos, gordi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Karla:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#0E2A24;
+    --deep-2:#163F33;
+    --moss:#1F5A45;
+    --sun:#FFC83D;
+    --sun-soft:#FFE59B;
+    --rose:#D22946;
+    --cream:#F6F1E2;
+    --cream-dim:rgba(246,241,226,.6);
+
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  :root:not([data-theme="light"]){color-scheme:dark;}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;}}
+  *,*::before,*::after{box-sizing:inherit;}
+
+  html,body{height:100%;margin:0;}
+  body{
+    background:radial-gradient(125% 85% at 50% 112%, var(--moss) 0%, var(--deep-2) 45%, var(--deep) 100%);
+    color:var(--cream);
+    font-family:Karla,"Segoe UI",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;
+    touch-action:manipulation;
+  }
+
+  #app{position:relative;height:100%;width:100%;overflow:hidden;}
+
+  #bar{
+    position:absolute;top:0;left:0;height:2px;width:0%;
+    background:var(--sun);opacity:.55;z-index:5;
+    transition:width .5s cubic-bezier(.3,.9,.3,1), background .8s ease;
+  }
+  #bar.done{background:var(--rose);opacity:.7;}
+
+  #intro{
+    position:absolute;inset:0;z-index:4;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:1.1rem;padding:2rem 1.7rem;text-align:center;
+    background:radial-gradient(125% 85% at 50% 112%, var(--moss) 0%, var(--deep-2) 45%, var(--deep) 100%);
+    transition:opacity .8s ease;
+  }
+  #intro .date{margin:0;font-size:.85rem;letter-spacing:.05em;color:var(--cream-dim);}
+  #intro h1{
+    font-family:Fraunces,Georgia,serif;font-weight:300;
+    font-size:clamp(2.2rem,11vw,3.4rem);line-height:1.05;margin:0;max-width:10ch;
+    font-variation-settings:"SOFT" 40,"WONK" 1;
+  }
+  #intro .sign{
+    margin:-.35rem 0 0;font-size:.95rem;color:var(--sun);opacity:.85;
+  }
+  #intro .bud{width:clamp(84px,22vw,118px);margin-bottom:.3rem;}
+  .go{
+    margin-top:.8rem;border:0;border-radius:999px;cursor:pointer;
+    background:var(--sun);color:var(--deep);
+    font-family:Karla,sans-serif;font-size:1rem;padding:.85rem 2rem;
+    box-shadow:0 10px 32px rgba(255,200,61,.22);
+  }
+  button:focus-visible{outline:2px solid var(--sun-soft);outline-offset:3px;}
+
+  #scene{
+    position:absolute;inset:0;
+    display:grid;grid-template-rows:1fr minmax(250px,50%);
+    opacity:0;transition:opacity .9s ease;
+  }
+  #scene.on{opacity:1;}
+
+  #tap{
+    position:absolute;inset:0;z-index:3;touch-action:none;
+    background:none;border:0;padding:0;cursor:pointer;
+    display:block;width:100%;height:100%;
+  }
+
+  .say{
+    display:flex;align-items:center;justify-content:center;
+    padding:calc(2.4rem + env(safe-area-inset-top,0px)) 1.6rem .8rem;
+  }
+  #msg{
+    font-family:Fraunces,Georgia,serif;font-weight:300;
+    font-size:clamp(1.3rem,6vw,1.95rem);line-height:1.38;
+    margin:0;max-width:20ch;text-align:center;
+    opacity:0;transform:translateY(14px);
+    transition:opacity .55s ease,transform .55s cubic-bezier(.2,.9,.3,1);
+  }
+  #msg.on{opacity:1;transform:translateY(0);}
+  #msg.long{font-size:clamp(1.12rem,5vw,1.6rem);max-width:22ch;}
+  #msg.last{font-size:clamp(1.5rem,7.2vw,2.2rem);max-width:18ch;}
+
+  .vase{position:relative;overflow:visible;}
+  .vase svg{display:block;width:100%;height:100%;overflow:visible;position:relative;z-index:1;}
+  #glow{
+    position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);
+    width:118%;aspect-ratio:1/1;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(circle, rgba(255,200,61,.22) 0%, rgba(255,200,61,.07) 42%, rgba(255,200,61,0) 68%);
+    opacity:0;transition:opacity 1.1s ease;
+  }
+  #bunch{
+    transform-origin:230px 472px;
+    transition:filter 1.4s ease;
+    will-change:transform;
+  }
+  #bunch.done{filter:drop-shadow(0 0 22px rgba(255,200,61,.24));}
+  #heads{transform-origin:230px 472px;will-change:transform;}
+
+  .stem-line{
+    stroke:#357E52;stroke-width:5;fill:none;stroke-linecap:round;
+    animation:draw .6s ease-out forwards;
+  }
+  @keyframes draw{to{stroke-dashoffset:0;}}
+
+  .head{
+    transform-box:fill-box;transform-origin:center;
+    transform:scale(.02);
+    animation:bloom .8s cubic-bezier(.22,1.4,.4,1) .28s forwards;
+  }
+  .head.rose{animation-name:bloomRose;animation-duration:1.25s;animation-delay:.34s;}
+  @keyframes bloom{to{transform:scale(1);}}
+  @keyframes bloomRose{
+    from{transform:scale(.02) rotate(-55deg);}
+    to{transform:scale(1) rotate(0deg);}
+  }
+
+  .soft{opacity:0;animation:fadein .9s ease .3s forwards;}
+  @keyframes fadein{to{opacity:1;}}
+
+  #foot{
+    position:absolute;left:0;right:0;
+    bottom:calc(1.3rem + env(safe-area-inset-bottom,0px));
+    z-index:6;
+    display:flex;align-items:center;justify-content:center;min-height:2.5rem;
+    font-size:.85rem;color:var(--cream-dim);
+  }
+  #hint{transition:opacity .5s ease;}
+  #hint.gone{display:none;}
+  #cue{
+    display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:var(--sun);vertical-align:middle;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1);opacity:.3;}
+    50%{transform:scale(1.55);opacity:.75;}
+  }
+  #again{
+    display:none;
+    background:rgba(11,33,28,.82);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,200,61,.6);
+    color:var(--sun);border-radius:999px;
+    padding:.72rem 1.6rem;line-height:1;
+    font-family:Karla,sans-serif;font-size:.95rem;letter-spacing:.01em;
+    cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.35);
+  }
+  #again.on{display:inline-block;animation:fadein .7s ease forwards;}
+
+  #petals{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+  .petal{
+    position:absolute;top:-14vh;width:12px;height:19px;background:var(--sun);
+    border-radius:60% 60% 50% 50%/70% 70% 40% 40%;
+    animation:fall linear forwards;
+  }
+  .petal.red{
+    background:var(--rose);
+    border-radius:52% 52% 44% 44%/62% 62% 50% 50%;
+  }
+  @keyframes fall{to{transform:translateY(124vh) rotate(520deg);opacity:.1;}}
+
+  @media (prefers-reduced-motion: reduce){
+    .petal{display:none;}
+    .stem-line{stroke-dashoffset:0 !important;animation:none;}
+    .head{transform:scale(1);animation:none;}
+    .soft{opacity:1;animation:none;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="bar"></div>
+
+  <section id="intro">
+    <svg class="bud" viewBox="0 0 120 200" aria-hidden="true">
+      <path d="M60 196 C58 152 62 122 60 96" stroke="#3C8C5E" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M60 150 C42 146 34 134 33 120 C48 120 58 132 60 150Z" fill="#3C8C5E"/>
+      <path d="M60 96 C44 88 42 62 60 44 C78 62 76 88 60 96Z" fill="#2E7A52"/>
+      <path d="M60 92 C52 80 52 62 60 50 C68 62 68 80 60 92Z" fill="#FFC83D" opacity=".55"/>
+    </svg>
+    <p class="date">21 de septiembre</p>
+    <h1>Para vos, gordi.</h1>
+    <p class="sign">De: tu amorcito Rama</p>
+    <button class="go" id="go">Abrir</button>
+  </section>
+
+  <section id="scene">
+    <div class="say"><p id="msg" aria-live="polite"></p></div>
+    <div class="vase">
+      <div id="glow"></div>
+      <svg viewBox="0 0 460 490" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+        <defs>
+          <path id="rp" d="M0 6 C-22 0 -36 -17 -32 -33 C-27 -44 -12 -47 0 -39 C12 -47 27 -44 32 -33 C36 -17 22 0 0 6Z"/>
+          <g id="fl">
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(13)"/>
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(65)"/>
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(117)"/>
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(169)"/>
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(221)"/>
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(273)"/>
+            <ellipse cx="0" cy="-26" rx="8" ry="24" fill="#C08214" opacity=".8" transform="rotate(325)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(26)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(52)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(78)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(104)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(130)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(156)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(182)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(208)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(234)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(260)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(286)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(312)"/>
+            <ellipse cx="0" cy="-23" rx="7" ry="21" fill="currentColor" transform="rotate(338)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(13)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(65)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(117)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(169)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(221)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(273)"/>
+            <ellipse cx="0" cy="-16" rx="5.5" ry="14" fill="#FFE07A" transform="rotate(325)"/>
+            <ellipse cx="0" cy="0" rx="13.5" ry="12.5" fill="#8A5418"/>
+            <ellipse cx="0" cy="-1" rx="9" ry="8" fill="#6B3F10"/>
+            <circle cx="-4" cy="-3" r="1.5" fill="#4A2A08" opacity=".7"/>
+            <circle cx="3" cy="-5" r="1.5" fill="#4A2A08" opacity=".7"/>
+            <circle cx="5" cy="1" r="1.5" fill="#4A2A08" opacity=".7"/>
+            <circle cx="-1" cy="3" r="1.5" fill="#4A2A08" opacity=".7"/>
+            <circle cx="-6" cy="2" r="1.4" fill="#4A2A08" opacity=".7"/>
+            <circle cx="0" cy="-2" r="1.4" fill="#4A2A08" opacity=".7"/>
+          </g>
+          <g id="rs">
+            <path d="M0 0 C-7 -15 -5 -32 0 -47 C5 -32 7 -15 0 0Z" fill="#2E7A52" transform="rotate(34) translate(0,-6)"/>
+            <path d="M0 0 C-7 -15 -5 -32 0 -47 C5 -32 7 -15 0 0Z" fill="#357E52" transform="rotate(154) translate(0,-6)"/>
+            <path d="M0 0 C-7 -15 -5 -32 0 -47 C5 -32 7 -15 0 0Z" fill="#2E7A52" transform="rotate(274) translate(0,-6)"/>
+            <use href="#rp" fill="#C8203C" transform="rotate(0)"/>
+            <use href="#rp" fill="#BC1C37" transform="rotate(72)"/>
+            <use href="#rp" fill="#C8203C" transform="rotate(144)"/>
+            <use href="#rp" fill="#BC1C37" transform="rotate(216)"/>
+            <use href="#rp" fill="#C8203C" transform="rotate(288)"/>
+            <use href="#rp" fill="#E8546C" opacity=".2" transform="rotate(0) scale(.88)"/>
+            <use href="#rp" fill="#E8546C" opacity=".2" transform="rotate(144) scale(.88)"/>
+            <use href="#rp" fill="#E8546C" opacity=".2" transform="rotate(288) scale(.88)"/>
+            <use href="#rp" fill="#AE1531" transform="rotate(36) scale(.78)"/>
+            <use href="#rp" fill="#A61230" transform="rotate(108) scale(.78)"/>
+            <use href="#rp" fill="#AE1531" transform="rotate(180) scale(.78)"/>
+            <use href="#rp" fill="#A61230" transform="rotate(252) scale(.78)"/>
+            <use href="#rp" fill="#AE1531" transform="rotate(324) scale(.78)"/>
+            <use href="#rp" fill="#97102A" transform="rotate(20) scale(.56)"/>
+            <use href="#rp" fill="#8E0C26" transform="rotate(110) scale(.56)"/>
+            <use href="#rp" fill="#97102A" transform="rotate(200) scale(.56)"/>
+            <use href="#rp" fill="#8E0C26" transform="rotate(290) scale(.56)"/>
+            <use href="#rp" fill="#83091F" transform="rotate(62) scale(.36)"/>
+            <use href="#rp" fill="#7A0719" transform="rotate(182) scale(.36)"/>
+            <use href="#rp" fill="#83091F" transform="rotate(302) scale(.36)"/>
+            <path d="M1 7 C-9 5 -15 -4 -11 -12 C-7 -20 5 -22 11 -15 C17 -9 15 2 6 6" fill="none" stroke="#6E0616" stroke-width="5" stroke-linecap="round"/>
+            <path d="M2 3 C-4 2 -7 -3 -4 -8 C-1 -12 5 -12 8 -8" fill="none" stroke="#9E1229" stroke-width="3.6" stroke-linecap="round"/>
+          </g>
+          <path id="lf" d="M0 0 C-26 -10 -44 -33 -46 -64 C-16 -58 -5 -30 0 0Z"/>
+        </defs>
+        <g id="bunch">
+          <g id="stems"></g>
+          <g id="leaves"></g>
+          <g id="heads"></g>
+          <g id="wrap" class="soft" hidden>
+            <path d="M203 424 Q230 414 257 424 L257 446 Q230 436 203 446Z" fill="#FFC83D"/>
+            <path d="M230 444 C221 460 212 468 202 474 C212 470 224 464 230 454Z" fill="#E8A81F"/>
+            <path d="M230 444 C239 460 248 468 258 474 C248 470 236 464 230 454Z" fill="#E8A81F"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <button id="tap" aria-label="Siguiente" hidden></button>
+  <div id="foot"><span id="hint">tocá la pantalla</span><span id="cue" hidden></span><button id="again">Verlas de nuevo</button></div>
+  <div id="petals"></div>
+</div>
+
+<script>
+(function(){
+  var MESSAGES = [
+    "No estoy con vos ahora asique estas son las flores que te puedo mandar",
+    "Porque hay cosas que quiero que sepas",
+    "Sos adictiva, nunca me voy a cansar de vos",
+    "No entiendo qué es lo que tenés, pero me encanta",
+    "Si pudiera estar 24/7 con vos lo haría",
+    "Me encanta salir con vos",
+    "Amo que puedas confiar en mí para todo",
+    "Amo tu intensidad y tu forma de amarme",
+    "Amo tu estilo",
+    "Amo tu sonrisa, tus labios",
+    "Amo cada parte de tu personalidad",
+    "Realmente me volvés loco",
+    "Sos todo lo que quiero para mí",
+    "Nunca van a alcanzar las flores para que entiendas lo que me pasa con vos",
+    "Y esta última es una rosa, que sé que te encantan",
+    "Te amo hoy y siempre, gordita mía"
+  ];
+
+  // 14 flores amarillas + la rosa al frente. La última frase no lleva flor.
+  var SPOTS = [
+    {x:234, y:114, s:1.00, r: -7, sq:1.00, c:"#FFC83D"},
+    {x:140, y:176, s:0.93, r: 14, sq:0.93, c:"#F7B922"},
+    {x:326, y:158, s:0.95, r:-16, sq:0.96, c:"#FFD44F"},
+    {x:190, y:252, s:0.88, r:  9, sq:1.00, c:"#FFC83D"},
+    {x:308, y:260, s:0.90, r: 18, sq:0.92, c:"#F5B421"},
+    {x: 92, y:266, s:0.80, r:-13, sq:0.90, c:"#FFD44F"},
+    {x:384, y:254, s:0.83, r: 22, sq:0.94, c:"#FFC83D"},
+    {x:170, y: 84, s:0.79, r: 20, sq:0.95, c:"#FFD86A"},
+    {x:298, y: 66, s:0.76, r:-21, sq:0.90, c:"#F7B922"},
+    {x: 68, y:174, s:0.72, r:-25, sq:0.92, c:"#FFC83D"},
+    {x:402, y:166, s:0.74, r: 26, sq:0.90, c:"#FFD44F"},
+    {x:124, y:340, s:0.75, r:  6, sq:0.98, c:"#F5B421"},
+    {x:358, y:344, s:0.77, r:-10, sq:0.93, c:"#FFC83D"},
+    {x:250, y:346, s:0.84, r: 16, sq:1.00, c:"#FFD65A"},
+    {x:228, y:202, s:1.14, r: -5, sq:1.00, rose:true}
+  ];
+
+  var LEAVES = [
+    {at:3, x:156, y:392, r:-34, s:1.00, c:"#3C8C5E"},
+    {at:6, x:312, y:386, r: 36, s:0.95, c:"#2E7A52", flip:true},
+    {at:9, x:196, y:436, r:-16, s:0.80, c:"#2E7A52"},
+    {at:12,x:282, y:430, r: 20, s:0.85, c:"#3C8C5E", flip:true}
+  ];
+
+  var BX = 230, BY = 472, NS = "http://www.w3.org/2000/svg";
+  var stems  = document.getElementById('stems');
+  var leaves = document.getElementById('leaves');
+  var heads  = document.getElementById('heads');
+  var wrap   = document.getElementById('wrap');
+  var msg    = document.getElementById('msg');
+  var bar    = document.getElementById('bar');
+  var hint   = document.getElementById('hint');
+  var cue    = document.getElementById('cue');
+  var glow   = document.getElementById('glow');
+  var bunch  = document.getElementById('bunch');
+  var again  = document.getElementById('again');
+  var tap    = document.getElementById('tap');
+  var i = 0, busy = false;
+
+  function grow(n){
+    var f = SPOTS[n];
+
+    var cx = BX + (f.x - BX) * 0.22;
+    var cy = BY - (BY - f.y) * 0.58;
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', 'M' + BX + ' ' + BY + ' Q' + cx.toFixed(1) + ' ' + cy.toFixed(1) + ' ' + f.x + ' ' + f.y);
+    p.setAttribute('class', 'stem-line');
+    p.setAttribute('stroke', f.rose ? '#2A6640' : ['#357E52','#2E7049','#3E8A5B'][n % 3]);
+    p.setAttribute('stroke-width', (4.2 + (f.s - 0.7) * 2.2).toFixed(1));
+    stems.appendChild(p);
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+
+    var g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', 'translate(' + f.x + ',' + f.y + ') rotate(' + f.r + ') scale(' + f.s + ',' + (f.s * f.sq).toFixed(3) + ')');
+    var u = document.createElementNS(NS, 'use');
+    u.setAttribute('href', f.rose ? '#rs' : '#fl');
+    u.setAttribute('class', f.rose ? 'head rose' : 'head');
+    if(!f.rose) u.style.color = f.c;
+    g.appendChild(u);
+    heads.appendChild(g);
+
+    LEAVES.forEach(function(l){
+      if(l.at !== n) return;
+      var use = document.createElementNS(NS, 'use');
+      use.setAttribute('href', '#lf');
+      use.setAttribute('class', 'soft');
+      use.setAttribute('fill', l.c);
+      use.setAttribute('transform', 'translate(' + l.x + ',' + l.y + ') rotate(' + l.r + ') scale(' + (l.flip ? -l.s : l.s) + ',' + l.s + ')');
+      leaves.appendChild(use);
+    });
+
+    if(n === 3) wrap.hidden = false;
+  }
+
+  function show(n){
+    msg.classList.remove('on');
+    setTimeout(function(){
+      msg.textContent = MESSAGES[n];
+      var last = n === MESSAGES.length - 1;
+      msg.classList.toggle('last', last);
+      msg.classList.toggle('long', !last && MESSAGES[n].length > 46);
+      msg.classList.add('on');
+    }, n === 0 ? 40 : 380);
+  }
+
+  function step(){
+    if(busy || i >= MESSAGES.length) return;
+    busy = true;
+    if(i > 0){ hint.classList.add('gone'); cue.hidden = false; }
+    if(i < SPOTS.length) grow(i);
+    show(i);
+    bar.style.width = ((i + 1) / MESSAGES.length * 100) + '%';
+    glow.style.opacity = Math.min(1, (i + 1) / SPOTS.length).toFixed(2);
+    if(SPOTS[i] && SPOTS[i].rose){
+      bar.classList.add('done');
+      setTimeout(function(){ rain(8, true); }, 700);
+    }
+    i++;
+    if(i === MESSAGES.length){
+      cue.hidden = true;
+      bunch.classList.add('done');
+      setTimeout(function(){ rain(30); }, 800);
+      setTimeout(function(){ again.classList.add('on'); }, 3400);
+    }
+    setTimeout(function(){ busy = false; }, 620);
+  }
+
+  function rain(n, red){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var box = document.getElementById('petals');
+    for(var k = 0; k < n; k++){
+      (function(k){
+        setTimeout(function(){
+          var p = document.createElement('div');
+          p.className = 'petal' + (red || k % 5 === 0 ? ' red' : '');
+          p.style.left = (Math.random() * 100) + '%';
+          p.style.animationDuration = (5 + Math.random() * 5) + 's';
+          p.style.opacity = (0.45 + Math.random() * 0.45).toFixed(2);
+          p.style.width = (9 + Math.random() * 7) + 'px';
+          box.appendChild(p);
+          setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 11000);
+        }, k * (red ? 190 : 340));
+      })(k);
+    }
+  }
+
+  // el ramo se inclina con el dedo y vuelve con rebote
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ang = 0, vel = 0, target = 0, lag = 0, lagV = 0;
+  var press = {on:false, x:0, y:0, moved:0};
+
+  function frame(ts){
+    var idle = reduce ? 0 : Math.sin(ts / 2700) * 1.1;
+    vel = (vel + (target - ang) * 0.14) * 0.76;
+    ang += vel;
+    if(Math.abs(ang) < 0.001 && Math.abs(vel) < 0.001) ang = vel = 0;
+    var total = idle + ang;
+    lagV = (lagV + (total - lag) * 0.10) * 0.80;
+    lag += lagV;
+    bunch.style.transform = 'translateX(' + (ang * 0.7).toFixed(2) + 'px) rotate(' + total.toFixed(2) + 'deg)';
+    heads.style.transform = 'rotate(' + (lag - total).toFixed(2) + 'deg)';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  tap.addEventListener('pointerdown', function(e){
+    press.on = true; press.x = e.clientX; press.y = e.clientY; press.moved = 0;
+    try{ tap.setPointerCapture(e.pointerId); }catch(err){}
+  });
+
+  tap.addEventListener('pointermove', function(e){
+    if(!press.on) return;
+    var dx = e.clientX - press.x, dy = e.clientY - press.y;
+    press.moved = Math.max(press.moved, Math.abs(dx) + Math.abs(dy));
+    target = Math.max(-15, Math.min(15, dx * 0.09));
+    vel *= 0.6;
+  });
+
+  function release(e){
+    if(!press.on) return;
+    press.on = false;
+    target = 0;
+    if(!e) return;
+    var dx = e.clientX - press.x, dy = press.y - e.clientY;
+    if(press.moved < 12) step();
+    else if(dy > 45 && Math.abs(dx) < 45) step();
+  }
+  tap.addEventListener('pointerup', release);
+  tap.addEventListener('pointercancel', function(){ release(null); });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight' || e.key === 'ArrowDown'){
+      e.preventDefault();
+      step();
+    }
+  });
+
+  again.addEventListener('click', function(e){
+    e.stopPropagation();
+    [stems, leaves, heads].forEach(function(g){
+      while(g.firstChild) g.removeChild(g.firstChild);
+    });
+    wrap.hidden = true;
+    again.classList.remove('on');
+    bar.classList.remove('done');
+    bunch.classList.remove('done');
+    glow.style.opacity = '0';
+    cue.hidden = false;
+    hint.classList.add('gone');
+    bar.style.width = '0%';
+    msg.classList.remove('on');
+    i = 0; busy = false;
+    tap.hidden = false;
+    setTimeout(step, 450);
+  });
+
+  document.getElementById('go').addEventListener('click', function(){
+    var intro = document.getElementById('intro');
+    intro.style.opacity = '0';
+    setTimeout(function(){ intro.style.display = 'none'; }, 850);
+    document.getElementById('scene').classList.add('on');
+    tap.hidden = false;
+    setTimeout(step, 420);
+  });
+})();
+</script>
+</body>
+</html>
