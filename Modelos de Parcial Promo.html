@@ -1,0 +1,716 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Modelos de Parcial Promo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: hoja de examen centrada, una consigna por vez, casilleros de progreso arriba y corrección inmediata debajo de cada consigna */
+:root{
+  --bg:#EDF1EE; --paper:#FBFCFA; --ink:#1B2826; --muted:#5A6A66; --line:#D2DBD7;
+  --accent:#25695A; --accent-ink:#FFFFFF; --accent-soft:#DCEBE5; --mark:#9C5F17;
+  --ok:#2C7A4C; --ok-soft:#E0F0E5; --bad:#B3402E; --bad-soft:#F7E2DD; --warn-soft:#F6ECDC;
+  --f-display:'Bitter', Georgia, 'Times New Roman', serif;
+  --f-body:'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#111917; --paper:#19231F; --ink:#E3ECE8; --muted:#98AAA4; --line:#2D3C38;
+  --accent:#63B7A1; --accent-ink:#0E1A17; --accent-soft:#1E3631; --mark:#D9A15C;
+  --ok:#66C08A; --ok-soft:#183126; --bad:#E57E69; --bad-soft:#3A211C; --warn-soft:#33291B; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#111917; --paper:#19231F; --ink:#E3ECE8; --muted:#98AAA4; --line:#2D3C38;
+  --accent:#63B7A1; --accent-ink:#0E1A17; --accent-soft:#1E3631; --mark:#D9A15C;
+  --ok:#66C08A; --ok-soft:#183126; --bad:#E57E69; --bad-soft:#3A211C; --warn-soft:#33291B; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,34px);line-height:1.15;margin:0;text-wrap:balance}
+.meta{color:var(--muted);font-size:14px;margin:0}
+.meta b{color:var(--ink)}
+
+.progress{display:flex;flex-direction:column;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px}
+.cells{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.cell{font-family:var(--f-mono);font-size:13px;height:34px;border-radius:7px;border:1.5px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.cell.cur{border-color:var(--ink);color:var(--ink)}
+.cell.pend{background:var(--warn-soft);border-color:var(--mark);color:var(--mark)}
+.cell.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.cell.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.cell.cur{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.pbar .score{font-family:var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:clamp(18px,4vw,30px);display:flex;flex-direction:column;gap:18px}
+.qhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px dashed var(--line);padding-bottom:12px}
+.qnum{font-family:var(--f-display);font-weight:700;font-size:20px}
+.qtag{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qpts{font-family:var(--f-mono);font-size:13px;color:var(--mark)}
+.prompt{font-size:17px;margin:0;font-weight:700;text-wrap:pretty}
+.hint{font-size:14px;color:var(--muted);margin:-8px 0 0}
+
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;background:var(--paper)}
+.opt:hover{border-color:var(--accent)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.key{font-family:var(--f-mono);font-size:13px;flex:0 0 26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .key{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .key{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .key{background:var(--bad);border-color:var(--bad);color:var(--paper)}
+.locked .opt{cursor:default}
+.locked .opt:hover{border-color:inherit}
+
+.vf{display:flex;flex-direction:column;gap:10px}
+.vfrow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px}
+.vfrow.right{border-color:var(--ok);background:var(--ok-soft)}
+.vfrow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.vfrow p{margin:0;min-width:0}
+.vfbtns{display:flex;gap:6px}
+.vfb{font-family:var(--f-mono);font-size:14px;width:40px;height:36px;border-radius:7px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.vfb.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.vfexp{grid-column:1/-1;font-size:14px;color:var(--ink);margin:0;border-top:1px dashed var(--line);padding-top:8px}
+.vfexp b{font-family:var(--f-mono);font-weight:500}
+
+.match{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:12px clamp(36px,9vw,80px)}
+.mcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.mitem{position:relative;z-index:2;text-align:left;font:inherit;font-size:14.5px;line-height:1.4;color:var(--ink);padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);cursor:pointer;min-height:48px}
+.mitem:hover{border-color:var(--accent)}
+.mitem.picked{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.mitem.linked{border-color:var(--accent)}
+.mitem .lt{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-right:6px}
+.match svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+.match svg path{fill:none;stroke:var(--accent);stroke-width:2}
+.match svg polygon{fill:var(--accent)}
+.match svg .ok path,.match svg path.ok{stroke:var(--ok)} .match svg polygon.ok{fill:var(--ok)}
+.match svg path.bad{stroke:var(--bad);stroke-dasharray:5 4} .match svg polygon.bad{fill:var(--bad)}
+.locked .mitem{cursor:default}
+
+.fill{font-size:17px;line-height:1.9;margin:0}
+.blank{display:inline-block;min-width:9em;border-bottom:2px solid var(--mark);padding:0 6px;color:var(--mark);font-weight:700;line-height:1.4}
+.blank.right{color:var(--ok);border-color:var(--ok)} .blank.wrong{color:var(--bad);border-color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:14.5px;color:var(--ink);padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);cursor:pointer;text-align:left}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.chip.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+label.fl{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+textarea{width:100%;min-height:130px;resize:vertical;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:12px}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+textarea[readonly]{opacity:.85}
+.field{display:flex;flex-direction:column;gap:6px}
+.count{font-size:12.5px;color:var(--muted);align-self:flex-end;font-variant-numeric:tabular-nums}
+
+.feedback{border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+.feedback.ok{background:var(--ok-soft);border-left:4px solid var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-left:4px solid var(--bad)}
+.feedback.info{background:var(--accent-soft);border-left:4px solid var(--accent)}
+.feedback h3{margin:0;font-family:var(--f-display);font-size:16px}
+.feedback p{margin:0}
+.feedback ul{margin:0;padding-left:18px}
+.checks{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto}
+.model{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:14.5px}
+
+.actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;align-items:center}
+.actions .grp{display:flex;gap:10px;flex-wrap:wrap}
+button.btn{font:inherit;font-size:15px;font-weight:700;padding:10px 18px;border-radius:8px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+button.btn:hover{border-color:var(--ink)}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.btn.primary:hover{filter:brightness(1.07)}
+button.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.msg{font-size:14px;color:var(--bad);margin:0}
+.confirm{background:var(--warn-soft);border:1px solid var(--mark);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+
+.result-top{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.bigscore{font-family:var(--f-display);font-weight:700;font-size:64px;line-height:1;font-variant-numeric:tabular-nums}
+.bigscore small{font-size:24px;color:var(--muted)}
+.verdict{font-family:var(--f-mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;display:inline-block}
+.verdict.ok{background:var(--ok-soft);color:var(--ok);border:1.5px solid var(--ok)}
+.verdict.bad{background:var(--bad-soft);color:var(--bad);border:1.5px solid var(--bad)}
+h2{font-family:var(--f-display);font-size:19px;margin:6px 0 0}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 70px;gap:4px 12px;font-size:14.5px}
+.bar .track{grid-column:1/-1;height:8px;border-radius:4px;background:var(--line);overflow:hidden;position:relative}
+.bar .track i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:4px}
+.bar .track i.low{background:var(--bad)}
+.bar .track::after{content:"";position:absolute;left:60%;top:-2px;bottom:-2px;width:2px;background:var(--mark)}
+.bar .v{text-align:right;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
+.review{display:flex;flex-direction:column;gap:6px}
+.rv{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--paper);cursor:pointer;text-align:left;font-family:inherit;color:var(--ink)}
+.rv:hover{border-color:var(--accent)}
+.rv .n{font-family:var(--f-mono)}
+.rv .p{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.rv .p.ok{color:var(--ok)} .rv .p.bad{color:var(--bad)}
+.foot{font-size:13px;color:var(--muted);margin:0}
+@media (max-width:480px){ .cells{gap:4px} .cell{height:30px;font-size:12px} .mitem{font-size:13.5px;padding:8px 9px} .bigscore{font-size:52px} }
+@media (prefers-reduced-motion: no-preference){ .sheet{animation:in .22s ease-out} @keyframes in{from{transform:translateY(4px)}to{transform:none}} }
+</style>
+<style>
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tab{font:inherit;text-align:left;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tab:hover{border-color:var(--accent)}
+.tab b{font-family:var(--f-display);font-size:16px}
+.tab span{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 -3px 0 var(--accent)}
+.tab.pass span{color:var(--ok)} .tab.fail span{color:var(--bad)}
+@media (max-width:480px){ .tabs{grid-template-columns:repeat(2,1fr)} }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">UNMdP · Promoción de la Salud Crítica y Educación para la Salud</span>
+    <h1>Modelos de parcial</h1>
+    <p class="meta">Cuatro temas con la misma estructura: <b>3</b> de opción múltiple, <b>2</b> de verdadero o falso, <b>2</b> de unir con flechas, <b>1</b> de completar y justificar y <b>2</b> de desarrollo. Cada consigna vale 10 puntos y se aprueba con <b>60/100</b>. Cada tema guarda su progreso aunque cambies de pestaña.</p>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Temas"></nav>
+
+  <div class="progress">
+    <div class="cells" id="cells"></div>
+    <div class="pbar"><span id="pstatus"></span><span class="score" id="pscore"></span></div>
+  </div>
+
+  <main id="stage"></main>
+  <p class="foot">Las preguntas de cada tema son fijas; el orden de las opciones se mezcla al reiniciar.</p>
+</div>
+
+<script>
+const TOPICS = {
+  A:"Concepto de salud y paradigmas",
+  B:"Determinación social y salud colectiva",
+  C:"Niveles de atención, prevención y APS",
+  D:"Promoción de la salud y Ottawa",
+  E:"ECNT, alimentación y comunicación",
+  F:"Corriente emancipadora"
+};
+const TYPES = {mc:"Opción múltiple", vf:"Verdadero o falso", match:"Unir con flechas", fill:"Completar y justificar", dev:"Desarrollo"};
+
+const MODELS = [
+/* ===================== TEMA 1 ===================== */
+[
+ {type:"mc", topic:"A", q:"Un paradigma es:",
+  o:["Un conjunto de conocimientos y creencias aceptados por una comunidad científica en un período histórico, que puede transformarse cuando aparecen problemas que no logra resolver","Una verdad científica definitiva que no cambia con el paso del tiempo","Una norma sanitaria dictada por la OMS para todos los países","Un método estadístico para medir el riesgo de enfermar"],
+  e:"Como es una construcción social, el paradigma entra en crisis ante problemas que no puede responder y puede ser reemplazado por uno superador. La forma de entender la salud condiciona la formación profesional, la organización de los servicios y las políticas públicas."},
+ {type:"mc", topic:"C", q:"La Conferencia de Alma-Ata (1978) consagró la APS como la estrategia para alcanzar la meta de:",
+  o:["Salud para Todos en el año 2000","Las metas de desarrollo sostenible de la Agenda 2030","La salud en todas las políticas","La eliminación de las grasas trans industriales"],
+  e:"La Agenda 2030 se vinculó con la promoción de la salud en Shanghái (2016), y la salud en todas las políticas se consolidó en Helsinki (2013)."},
+ {type:"mc", topic:"E", q:"El ambiente obesogénico se define como:",
+  o:["La suma de influencias que el entorno, las oportunidades o las condiciones de vida tienen en el fomento de la obesidad","La predisposición genética individual a acumular grasa","La falta de voluntad de las personas para comer de forma saludable","Una alteración metabólica propia de la infancia"],
+  e:"Incluye la disponibilidad de comida rápida, ultraprocesados y bebidas azucaradas, el sedentarismo, las pantallas, los trastornos del sueño y el estrés. Por eso la obesidad infantil no se explica por falta de voluntad."},
+ {type:"vf", topic:"B", q:"Indicá si cada afirmación sobre la salud pública y sus modelos es verdadera o falsa.", s:[
+  ["El modelo higienista buscaba prevenir peligros mediante el saneamiento del ambiente.",true,"Es el primero de los tres modelos sanitarios."],
+  ["El modelo preventista incorporó los aportes de las ciencias sociales y de la conducta.",false,"Eso corresponde al modelo multicausal. El preventista se centró en la prevención específica de enfermedades particulares."],
+  ["En la salud pública convencional, lo social se considera algo externo a la persona.",true,"Con la misma importancia que lo biológico a la hora de generar enfermedad."],
+  ["En la salud pública ampliada, el Estado se limita a garantizar higiene y sanidad.",false,"En la salud colectiva el Estado cumple un rol de regulador y distribuidor de recursos."]]},
+ {type:"vf", topic:"F", q:"Indicá si cada afirmación sobre la definición emancipadora de salud es verdadera o falsa.", s:[
+  ["Entre las capacidades humanas que menciona la corriente emancipadora están la pasión y el enojo.",true,"Junto con el razonamiento, la imaginación, la motivación, la toma de decisiones y la evaluación, entre otras."],
+  ["El futuro de una persona solo puede verse afectado por un daño corporal.",false,"Puede afectarse por la afección de las capacidades (educativa o corporal) o por el condicionamiento del proyecto."],
+  ["La dimensión simbólica del cuerpo puede existir sin una estructura biológica que la sostenga.",false,"Son interdependientes: lo simbólico necesita lo biológico, y un cuerpo sin símbolos no tiene conciencia de sí."],
+  ["Las corporeizaciones son hábitos y reacciones automáticas; las inscripciones, marcas físicas y metabólicas.",true,"Muestran que la enfermedad también es una marca de la interacción del cuerpo con las tensiones sociales."]]},
+ {type:"match", topic:"D", q:"Uní cada eje de la Carta de Ottawa con la precisión que le corresponde.",
+  L:["Políticas públicas saludables","Ambientes favorables","Acción comunitaria","Aptitudes personales","Reorientación de los servicios"],
+  R:["Que los responsables políticos tomen conciencia de las consecuencias de sus decisiones para la salud","Evaluación sistemática del impacto de los cambios del medio ambiente en la salud","Acceso total y constante a la información, la instrucción sanitaria y la ayuda financiera","Preparar a la población para las etapas de la vida, en escuelas, hogares y trabajo","Responsabilidad compartida entre individuos, comunidad, profesionales, instituciones y gobiernos"]},
+ {type:"match", topic:"A", q:"Uní cada atributo del Modelo Médico Hegemónico (Menéndez) con su descripción.",
+  L:["Biologicismo","Ahistoricismo y asocialidad","Individualismo","Mercantilización","Asimetría"],
+  R:["Privilegia lo anátomo-fisiológico como causa de la enfermedad","Separa la enfermedad de las condiciones históricas, económicas y políticas","Centra el diagnóstico y el tratamiento en el individuo aislado","Convierte la práctica médica, los fármacos y la tecnología en mercancías","Relación jerárquica que deslegitima el saber del paciente"]},
+ {type:"fill", topic:"C", before:"La Atención Primaria de la Salud es", after:"que atraviesa y reorienta a todos los niveles de atención.",
+  o:["una estrategia político-sanitaria","el primer nivel de atención","un espacio físico como el CAPS","un nivel de complejidad"],
+  keys:["La APS no es lo mismo que el primer nivel de atención","El primer nivel es un espacio físico y administrativo de la pirámide asistencial","Distingue APS (política), atención primaria (modelo) y primer nivel (nivel asistencial)","Un paciente derivado al tercer nivel no sale de la estrategia de APS"],
+  model:"La APS es una estrategia político-sanitaria global que atraviesa, articula y reorienta a todos los niveles e instituciones del sistema. No es lo mismo que el primer nivel de atención, que es un espacio físico y administrativo dentro de la pirámide asistencial. Hay que distinguir la APS (política de salud), la atención primaria (modelo de atención) y el primer nivel (nivel asistencial). Por eso un paciente derivado de un CAPS a un hospital de tercer nivel no sale de la APS: ese hospital forma parte de la red integrada."},
+ {type:"dev", topic:"B", q:"Explicá los conceptos de modos, condiciones y estilos de vida, y cómo se relacionan entre sí.",
+  keys:["Modos de vida: dimensión general o estructural (organización de la producción y reproducción social, economía, políticas, leyes)","Los modos de vida crean el marco de oportunidades y restricciones","Condiciones de vida: dimensión particular o grupal (ingresos, empleo, vivienda, servicios, alimentos, entornos)","Estilos de vida: dimensión individual y familiar (alimentación, actividad física, descanso, cuidado)","Los estilos están condicionados por las condiciones y los modos: no son elecciones en el vacío","Ejemplo concreto o vínculo con la determinación social"],
+  model:"Los modos de vida son la dimensión general: la forma en que una sociedad organiza su producción y reproducción social (economía, valores, políticas, leyes, transporte, instituciones), y definen el marco de oportunidades y restricciones. Las condiciones de vida son la dimensión particular o grupal: los recursos reales de cada grupo (ingresos, empleo, vivienda, acceso a servicios, agua, alimentos en el barrio, entornos seguros), moldeados por los modos de vida. Los estilos de vida son la dimensión individual y familiar: hábitos de alimentación, actividad física, descanso y cuidado. Desde la salud crítica, los estilos no nacen de la pura voluntad: están condicionados por las condiciones del grupo y los modos de vida de la sociedad. Nadie elige libremente hábitos saludables si su trabajo, su economía o su barrio no le dan esa opción."},
+ {type:"dev", topic:"E", q:"¿Qué implica entender la alimentación como un derecho humano? Explicá el rol del Estado y el de la educación alimentaria.",
+  keys:["La alimentación es un derecho humano integral, no un negocio de mercado","Alimentación adecuada: cubrir macro y micronutrientes en proporciones adecuadas","Alimentos culturalmente apropiados, producidos y distribuidos de forma sustentable y justa","El Estado deja de culpar a las personas y regula el mercado (ultraprocesados, publicidad infantil, entornos)","Educación alimentaria: más que información, libre de publicidad, en escuelas y espacios de infancia","Autocontrol: dar capacidades para tomar decisiones autónomas y saludables"],
+  model:"Entender la alimentación como derecho humano significa garantizarla de forma integral y no tratarla como un negocio. El derecho a una alimentación adecuada implica cubrir las necesidades de macro y micronutrientes en proporciones adecuadas, con alimentos nutritivos y culturalmente apropiados, producidos y distribuidos de manera sustentable y justa. El Estado debe superar el discurso que culpa a cada persona y asumir un rol regulador firme: limitar los ultraprocesados, controlar la publicidad dirigida a la infancia y garantizar entornos protegidos y acceso a alimentos saludables. La educación alimentaria no es solo transmitir información: se implementa libre de publicidad, en escuelas y espacios de formación y recreación de la infancia, para que niños y niñas puedan elegir de forma saludable. Se suma el autocontrol, entendido como dar capacidades para tomar decisiones autónomas y saludables."}
+],
+/* ===================== TEMA 2 ===================== */
+[
+ {type:"mc", topic:"A", q:"Para Pracilio y Castellanos, la salud es:",
+  o:["Un producto social, resultante de las acciones que realizan a favor o en contra los actores sociales y políticos","El completo estado de bienestar físico, mental, social y espiritual","La ausencia de afecciones o enfermedades","La capacidad biológica individual de adaptarse al medio"],
+  e:"Para estos autores, la salud individual y colectiva surge de la relación dinámica entre procesos biológicos, ecológicos, culturales y económico-sociales."},
+ {type:"mc", topic:"C", q:"Entre los principios de la APS, la descentralización se define como:",
+  o:["La capacidad de tomar decisiones de acuerdo con la disponibilidad de recursos","La participación activa de la comunidad en la planificación, el financiamiento y el control de los servicios","La intervención de instituciones que comparten recursos para tratar problemas de salud","El traslado de pacientes desde el primer nivel hacia los hospitales"],
+  e:"La segunda opción es la participación comunitaria y la tercera, la intersectorialidad. La última describe una referencia."},
+ {type:"mc", topic:"F", q:"Según la corriente emancipadora, el sujeto saludable es aquel que:",
+  o:["Es capaz de plasmar su salud en su cuerpo-territorio y en su entorno material, simbólico y social","Cumple las prescripciones higiénicas indicadas por los expertos","Está subordinado a los objetivos, reglas y valores del mercado","No presenta ninguna enfermedad diagnosticada"],
+  e:"La tercera opción describe al cliente, que es pasivo y tiene influencia limitada sobre los mundos prácticos y simbólicos. Para esta corriente, tener una enfermedad no impide tener mucha salud."},
+ {type:"vf", topic:"D", q:"Indicá si cada afirmación sobre el informe de Jake Epp es verdadera o falsa.", s:[
+  ["Uno de los retos del informe de Epp es reducir las desigualdades en salud entre grupos socioeconómicos.",true,"Los otros dos son aumentar la prevención y la capacidad de afrontamiento de las enfermedades crónicas y la discapacidad."],
+  ["La ayuda mutua se refiere a las decisiones y hábitos individuales en beneficio del propio bienestar.",false,"Eso es el autocuidado. La ayuda mutua son las redes comunitarias y de apoyo social entre pares."],
+  ["El informe de Epp (1986) es un texto que complementa la Carta de Ottawa.",true,"Ambos son de 1986 y giran alrededor de la promoción de la salud."],
+  ["Entre sus estrategias, Epp propone centralizar las decisiones de salud en el ministerio.",false,"Propone participación comunitaria, fortalecer los servicios comunitarios y coordinar políticas en todos los sectores del gobierno."]]},
+ {type:"vf", topic:"E", q:"Indicá si cada afirmación sobre ECNT y comunicación es verdadera o falsa.", s:[
+  ["Las enfermedades no transmisibles son la principal causa de muerte en la población argentina.",true,"En el marco de una transición epidemiológica y nutricional."],
+  ["Entre los factores de riesgo de las ECNT están la hipertensión, el tabaco y la hipercolesterolemia.",true,"También la escasa ingesta de frutas y verduras, la falta de actividad física y el exceso de peso."],
+  ["El proyecto Karelia del Norte se basó en intensificar las consultas médicas individuales.",false,"Actuó sobre el entorno social y comercial con participación comunitaria, superando el enfoque médico individual."],
+  ["La comunicación para la salud debe apoyarse solo en el saber del equipo de salud.",false,"Reconoce la trama cultural y los saberes de todos los actores, que son imprescindibles."]]},
+ {type:"match", topic:"C", q:"Uní cada concepto de la organización de la atención con su descripción.",
+  L:["Primer nivel","Segundo nivel","Tercer nivel","Referencia","Contrarreferencia"],
+  R:["CAPS y consultorios comunitarios; resuelve cerca del 85%","Hospitales generales con especialidades básicas; junto al primero, hasta el 95%","Diálisis, quemados o cirugía cardiovascular; el 5% restante","Un equipo de menor complejidad transfiere la atención a uno de mayor capacidad resolutiva","El centro de mayor complejidad devuelve al paciente con informe y recomendaciones"]},
+ {type:"match", topic:"F", q:"Uní cada corriente con la forma en que considera al otro o su propósito.",
+  L:["Promoción convencional","Promoción empoderante","Promoción emancipadora","Promoción crítica"],
+  R:["Receptor pasivo o grupo en riesgo de enfermar","Cliente o gestor local, guiado por asesores expertos","Sujeto ético y agente de su propia existencia","Procura que el otro se mire, reflexione, comprenda, decida y actúe"]},
+ {type:"fill", topic:"A", before:"La definición de salud de la OMS de 1948 fue un avance, pero su principal crítica es que", after:".",
+  o:["plantea un ideal inalcanzable y difícil de medir","ignora la dimensión social del ser humano","define la salud solo como ausencia de enfermedad","la presenta como un proceso dinámico y reversible"],
+  keys:["Fue una definición positiva: no solo ausencia de enfermedad","Incorporó formalmente las dimensiones mental y social","El completo bienestar es un ideal prácticamente inalcanzable y difícil de medir","Ferrara (1984) propone la salud como proceso dinámico para quitarle rigidez"],
+  model:"En 1948 la OMS definió la salud de forma positiva, como el completo estado de bienestar físico, mental y social y no solo la ausencia de enfermedad. Fue un avance porque incorporó formalmente lo psicológico y lo social. Su principal crítica es que el «completo bienestar» es un ideal prácticamente inalcanzable y muy difícil de medir. Por eso Ferrara, en 1984, propuso entender la salud como un proceso dinámico, continuo, cambiante y reversible."},
+ {type:"dev", topic:"D", q:"Diferenciá promoción de la salud y prevención de la enfermedad. ¿Por qué es un error asociar la promoción solo al primer nivel de atención?",
+  keys:["Prevención: se enfoca en la enfermedad, con enfoque médico y estadístico","Prevención: controla factores de riesgo concretos en personas o grupos vulnerables","Promoción: se centra en el bienestar y en mejorar la salud de forma positiva","Promoción: se dirige a toda la población y actúa sobre las condiciones de vida","La promoción es transversal a los tres niveles de atención y de prevención (Quintero Fleites, Vignolo)","Ejemplo: promoción en un paciente internado o con enfermedad crónica"],
+  model:"La prevención se enfoca en las enfermedades: con un enfoque médico y estadístico busca evitar problemas de salud específicos o reducir sus consecuencias, controlando factores de riesgo concretos en personas o grupos vulnerables. La promoción se centra en el bienestar y en mejorar la salud de forma positiva: se dirige a toda la población y actúa sobre las condiciones de vida y sociales para transformar el entorno. Según Quintero Fleites y Vignolo, asociarla solo al primer nivel o a la prevención primaria es un error, porque es una estrategia transversal a los tres niveles de atención y a todos los niveles de prevención. Por ejemplo, un paciente en rehabilitación cardiovascular en un tercer nivel recibe acciones de promoción para fortalecer su autonomía, sus hábitos y su integración familiar."},
+ {type:"dev", topic:"B", q:"Compará la salud pública convencional con la salud pública ampliada o colectiva.",
+  keys:["Convencional: base biomédica y en factores de riesgo","Convencional: crece cuando se necesita control de la naturaleza, saneamiento y modelación de subjetividades para la expansión industrial","Convencional: lo social es externo a la persona; control por higiene, sanidad y educación en estilos de vida","Colectiva: gana impulso en las crisis, cuando se cuestionan los límites de los modelos","Colectiva: salud como objeto complejo, determinación social y transformaciones estructurales; Estado regulador y distribuidor","Colectiva: tres dimensiones general, particular e individual (modos, condiciones y estilos de vida)"],
+  model:"La salud pública convencional se basa en la perspectiva biomédica y en los factores de riesgo. Crece con fuerza cuando la organización social necesita controlar la naturaleza, asegurar un saneamiento mínimo y modelar subjetividades para la expansión industrial y de mercados. Considera lo social como algo externo a la persona y busca controlar las enfermedades con higiene, sanidad y educación en los estilos de vida. La salud colectiva gana visibilidad en las crisis, cuando se cuestionan los límites de esos modelos. Entiende la salud de los grupos como un objeto complejo, explicado por procesos de determinación social, y propone transformaciones estructurales. Piensa la salud en su dimensión sociohistórica, con un Estado regulador y distribuidor de recursos, y organiza la determinación en tres dimensiones: general (modos de vida), particular (condiciones de vida) e individual (estilos de vida)."}
+],
+/* ===================== TEMA 3 ===================== */
+[
+ {type:"mc", topic:"B", q:"Los tres componentes que forman el núcleo identitario de la salud colectiva son:",
+  o:["Cómo se concibe la salud-enfermedad, cómo se explica su producción en la población y qué propuestas hay para transformarla","Higiene, sanidad y educación en los estilos de vida","Biología humana, medio ambiente y estilos de vida","Prevención primaria, secundaria y terciaria"],
+  e:"Higiene, sanidad y educación en estilos de vida son las herramientas de la salud pública convencional. Biología, ambiente y estilos de vida responden a la multicausalidad del enfoque de factores de riesgo."},
+ {type:"mc", topic:"D", q:"Los tres pilares de la promoción de la salud que plantea la Declaración de Shanghái son:",
+  o:["Buena gobernanza, ciudades saludables y conocimientos sobre la salud","Autocuidado, ayuda mutua y entornos saludables","Equidad, justicia social y derecho a la salud","Políticas públicas, ambientes favorables y acción comunitaria"],
+  e:"La segunda opción son los mecanismos de Jake Epp, la tercera mezcla valores y principios de la APS, y la cuarta son tres de los ejes de Ottawa."},
+ {type:"mc", topic:"A", q:"¿Qué autor sostuvo que el derecho a la salud es uno de los más olvidados y a la vez el más trascendente, porque se vincula con la dignidad humana, la vida colectiva y la economía?",
+  o:["Carrillo","Ferrara","Menéndez","Breilh"],
+  e:"Para Carrillo, la salud del pueblo es fundamental para lograr su seguridad social y su paz."},
+ {type:"vf", topic:"C", q:"Indicá si cada afirmación sobre la APS Renovada es verdadera o falsa.", s:[
+  ["El proceso de renovación de la APS fue impulsado por la OPS en 2005.",true,"Frente a inequidades persistentes, cambios epidemiológicos y una aplicación fragmentada o selectiva."],
+  ["En la cima de la pirámide de la APS Renovada están los elementos fundamentales.",false,"En la cima están los valores (derecho a la salud, equidad, solidaridad); los elementos fundamentales están en la base."],
+  ["Los principios proveen las bases para las políticas, la legislación y la asignación de recursos.",true,"Ocupan el nivel medio de la pirámide."],
+  ["La cobertura universal es uno de los valores de la APS Renovada.",false,"Es un elemento fundamental, parte de la base estructural y funcional del sistema."]]},
+ {type:"vf", topic:"F", q:"Indicá si cada afirmación sobre las corrientes de promoción es verdadera o falsa.", s:[
+  ["En la promoción empoderante la enfermedad es el enfoque; en la emancipadora, un resultado.",true,"En la emancipadora la prioridad es la integridad de los sujetos."],
+  ["En la promoción emancipadora, el conocimiento sobre los problemas lo seleccionan los expertos.",false,"Parte de problemas identificados por los propios sujetos, con acceso libre a todo el conocimiento necesario."],
+  ["Chapela y Cárdenas describen la corriente empoderante como hegemónica o neoliberal.",true,"Y a la emancipadora como crítica o latinoamericana."],
+  ["El cliente tiene gran influencia sobre los mundos prácticos y simbólicos.",false,"Es pasivo, con influencia limitada y subordinado a las reglas del mercado."]]},
+ {type:"match", topic:"B", q:"Uní cada dimensión o enfoque con su contenido.",
+  L:["Dimensión general (Breilh)","Dimensión particular (Breilh)","Dimensión singular (Breilh)","Determinantes sociales (OMS)"],
+  R:["Modelo de acumulación, políticas macroestructurales y relación con la naturaleza","Reproducción social y condiciones de vida de cada grupo o clase","Estilo de vida, fenotipo, genotipo y decisiones personales","Factores externos aislados que aumentan el riesgo individual"]},
+ {type:"match", topic:"E", q:"Uní cada elemento con lo que representa en las experiencias de Karelia del Norte y PROPIA.",
+  L:["Pekka Puska","Organizaciones Martta","Reconversión hacia las bayas","Aceite de girasol alto oleico","Acuerdos con la industria láctea y cárnica"],
+  R:["Líder del proyecto en Finlandia","Organizaciones de mujeres que participaron en la intervención","Cambio agrícola para mejorar la dieta de la región","Reemplazo de las grasas trans en el programa argentino","Reducción de grasas y sal en los alimentos"]},
+ {type:"fill", topic:"E", before:"Desde la comunicación para la salud, la adopción de conductas saludables es consecuencia de", after:".",
+  o:["que la ciudadanía se apropie de otro sentido sobre la calidad de vida y la salud","campañas publicitarias intensivas","mensajes expertos más eficaces","controles y sanciones a la población"],
+  keys:["Perspectiva relacional: la comunicación como producción de sentidos en un contexto sociocultural","Reconoce la trama cultural y los saberes de todos los actores","Las estrategias de comunicación buscan reforzar la autonomía, no solo la eficacia de los mensajes","Comunicación para el fortalecimiento comunitario: perspectivas transdisciplinares desde el origen"],
+  model:"La promoción de conductas saludables no resulta de campañas ni de acosos publicitarios, sino de que la ciudadanía se apropie de otro sentido sobre la calidad de vida y la salud. Responde a la perspectiva relacional, que entiende la comunicación como producción de sentidos en un contexto sociocultural y reconoce los saberes de todos los actores. Las estrategias de comunicación son un componente transversal para reforzar la autonomía y la capacidad de decisión, más que para aumentar la eficacia de los mensajes, y la comunicación para el fortalecimiento comunitario incorpora a la comunidad desde el origen con perspectivas transdisciplinares."},
+ {type:"dev", topic:"F", q:"Explicá la definición emancipadora de salud. ¿Qué son las capacidades humanas y cómo se relacionan la salud y la enfermedad desde esta mirada?",
+  keys:["Salud como capacidad humana de concebir, diseñar y avanzar hacia futuros posibles","Proceso dinámico de autonomía, conciencia y transformación, no un estado biológico","Capacidades humanas: razonamiento, imaginación, motivación, pasión, enojo, decisión, evaluación, entre otras","El futuro se afecta por la afección de las capacidades o por el condicionamiento del proyecto","Salud y enfermedad no son opuestas: con una enfermedad crónica se puede tener mucha salud","La enfermedad solo resta salud si bloquea la capacidad de inventar y alcanzar futuros"],
+  model:"La corriente emancipadora (Chapela) define la salud como la capacidad humana de concebir, diseñar y avanzar hacia futuros posibles: inventar proyectos de vida deseables y actuar para alcanzarlos. Deja de ser un estado biológico para ser un proceso de autonomía, conciencia y transformación. Las capacidades humanas son el razonamiento, la imaginación, la motivación, la pasión, el enojo, la capacidad de modificar el mundo material, la toma de decisiones, la evaluación y la identificación de límites y posibilidades; su función es inventar y alcanzar futuros. Ese futuro se afecta por la afección de las capacidades (educativa o por daño corporal) o por el condicionamiento del proyecto. Salud y enfermedad no son opuestas: alguien con una enfermedad crónica puede tener mucha salud si conserva su capacidad de decidir y seguir con su proyecto. La enfermedad solo disminuye la salud cuando bloquea esa capacidad, y a veces despierta reflexión crítica y solidaridad."},
+ {type:"dev", topic:"A", q:"¿Qué es un paradigma? Explicá cómo evolucionó el concepto de salud a través de las definiciones de la OMS (1948), Ferrara y Chapela.",
+  keys:["Paradigma: conocimientos y creencias aceptados por una comunidad científica en un período histórico","Es una construcción social: entra en crisis y se transforma ante problemas nuevos","OMS 1948: completo bienestar físico, mental y social; avance pero ideal inalcanzable","Ferrara 1984: proceso dinámico, continuo, cambiante y reversible frente a los conflictos","Chapela: capacidad humana de diseñar, decidir y lograr futuros viables","La forma de entender la salud condiciona la formación, los servicios y las políticas"],
+  model:"Un paradigma es un conjunto de conocimientos y creencias aceptados por una comunidad científica en un período histórico, que responde a los problemas que se plantea esa ciencia. Como es una construcción social, entra en crisis cuando aparecen problemas que no puede resolver y puede ser reemplazado por otro superador. La forma de entender la salud condiciona la formación profesional, la relación con la comunidad, la organización de los servicios y las políticas públicas. En 1948 la OMS definió la salud como el completo bienestar físico, mental y social y no solo la ausencia de enfermedad: un avance, pero un ideal inalcanzable y difícil de medir. En 1984 Ferrara la planteó como un proceso dinámico, continuo, cambiante y reversible, que surge del accionar frente a los conflictos. Chapela la define como la capacidad humana de diseñar, decidir y lograr futuros viables."}
+],
+/* ===================== TEMA 4 ===================== */
+[
+ {type:"mc", topic:"C", q:"La prevención secundaria incluye:",
+  o:["El diagnóstico temprano en fase asintomática y el tratamiento adecuado de la enfermedad","Las medidas para evitar que la enfermedad aparezca, controlando sus causas","La rehabilitación física, psicológica y social del paciente","Evitar que se instalen epidemias de factores de riesgo en la población"],
+  e:"La segunda opción es prevención primaria, la tercera es terciaria y la última es primordial."},
+ {type:"mc", topic:"B", q:"La salud pública convencional tiene un desarrollo acelerado cuando:",
+  o:["La organización social requiere más control de la naturaleza, saneamiento mínimo y modelación de subjetividades para la expansión industrial","Se cuestionan los límites de los modelos vigentes en momentos de crisis","La comunidad participa en la planificación y el control de los servicios","Se busca transformar estructuralmente las relaciones de poder"],
+  e:"Las crisis impulsan a la salud colectiva, que propone transformaciones estructurales. La tercera opción describe la participación comunitaria de la APS."},
+ {type:"mc", topic:"D", q:"Según la Carta de Ottawa, si la población no tiene garantizados requisitos como la paz, la vivienda, la alimentación y los ingresos:",
+  o:["Las charlas educativas o los tratamientos médicos no lograrán cambios duraderos","Alcanza con reforzar las campañas de información","La promoción debe limitarse a la prevención primaria","El sector salud puede resolver el problema por sí solo"],
+  e:"Por eso Ottawa propone la acción coordinada de los sectores sanitarios, sociales y económicos, la industria, los medios, las organizaciones benéficas y los gobiernos."},
+ {type:"vf", topic:"A", q:"Indicá si cada afirmación sobre la medicina social latinoamericana es verdadera o falsa.", s:[
+  ["Menéndez formuló el concepto de proceso salud-enfermedad-atención en 1984.",true,"Y sostiene que en la construcción del concepto de salud intervienen procesos económicos, políticos e ideológicos."],
+  ["Para Laurell, la salud y la enfermedad son fenómenos separados e independientes.",false,"Para Laurell son partes indisociables de un solo fenómeno, situado y determinado socialmente."],
+  ["La mercantilización del MMH convierte la práctica médica y los insumos en mercancías.",true,"Fármacos y tecnología pasan a generar ganancia."],
+  ["Para Ferrara, la salud es un estado estático e irreversible.",false,"Es un proceso dinámico, continuo, cambiante y reversible."]]},
+ {type:"vf", topic:"C", q:"Indicá si cada afirmación sobre la atención y la APS es verdadera o falsa.", s:[
+  ["El primer nivel de atención es la puerta de entrada preferente al sistema sanitario.",true,"Es el nivel más cercano a la población."],
+  ["En la referencia, un centro de mayor complejidad transfiere al paciente a uno de menor complejidad.",false,"Es al revés: de menor a mayor capacidad resolutiva. La vuelta es la contrarreferencia."],
+  ["La APS es aplicable a todos los niveles de atención.",true,"Sus acciones son integrales: consideran lo curativo y lo preventivo."],
+  ["La intersectorialidad es la participación de la comunidad en la planificación y el control de los servicios.",false,"Eso es la participación comunitaria. La intersectorialidad es la intervención de instituciones que comparten recursos."]]},
+ {type:"match", topic:"F", q:"Uní cada concepto de la corriente emancipadora con su definición.",
+  L:["Prácticas poderdantes","Prácticas emancipadoras","Afección de las capacidades","Condicionamiento del proyecto","Dimensión simbólica"],
+  R:["Desarrollo de capacidades y generación de capitales para lograr los proyectos","Invención del proyecto en sí","Daño educativo o corporal que limita la capacidad de inventar futuros","La persona está condicionada a desear un determinado proyecto","Palabras, significados, valores y aprendizajes inscriptos en el cuerpo"]},
+ {type:"match", topic:"D", q:"Uní cada marco de promoción de la salud con su contenido.",
+  L:["Retos de Epp","Mecanismos de Epp","Estrategias de Epp","Pilares de Shanghái","Requisitos de Ottawa"],
+  R:["Reducir desigualdades y aumentar la prevención y el afrontamiento de lo crónico","Autocuidado, ayuda mutua y entornos saludables","Participación comunitaria, servicios comunitarios y políticas coordinadas","Buena gobernanza, ciudades saludables y conocimientos sobre la salud","Paz, educación, vivienda, alimentación, ingresos y equidad"]},
+ {type:"fill", topic:"B", before:"En la salud pública ampliada, los estilos de vida corresponden a la dimensión", after:"de la determinación social.",
+  o:["individual, de las familias","general, de la sociedad","particular, de los grupos","estructural, del Estado"],
+  keys:["Dimensión general (sociedad) = modos de vida","Dimensión particular (grupos) = condiciones de vida","Dimensión individual (familias) = estilos de vida; en Breilh, singular","Los estilos de vida están condicionados por las otras dos dimensiones"],
+  model:"Los estilos de vida corresponden a la dimensión individual, la de las familias (en Breilh, la dimensión singular). La salud pública ampliada organiza la determinación social en tres dimensiones: la general, de la sociedad, que corresponde a los modos de vida; la particular, de los grupos, que corresponde a las condiciones de vida; y la individual, que corresponde a los estilos de vida. Los estilos no son elecciones libres: están condicionados por las condiciones de vida del grupo y los modos de vida de la sociedad."},
+ {type:"dev", topic:"E", q:"Explicá qué es el ambiente obesogénico y desarrollá el modelo de cuatro niveles para abordar la obesidad infantil. ¿Por qué hacen falta estrategias que vayan más allá del sector salud?",
+  keys:["Obesidad infantil: mecanismo biológico de reserva expuesto a un ambiente obesogénico, no falta de voluntad","Ambiente obesogénico: ultraprocesados, bebidas azucaradas, sedentarismo, pantallas, sueño y estrés","Nivel del niño y nivel familiar, con ejemplos","Nivel comunitario (escuela, barrio, kioscos) y socio-político (medios, empresas, leyes)","Los cuatro niveles están conectados entre sí","Carácter multifactorial: estrategias que articulen recursos dentro y fuera del sector salud"],
+  model:"La obesidad infantil no se explica por falta de voluntad, sino por un mecanismo biológico de reserva expuesto a un ambiente obesogénico: la suma de influencias del entorno, las oportunidades y las condiciones de vida que fomentan la obesidad, como la comida rápida, los ultraprocesados y las bebidas azucaradas, el sedentarismo, el exceso de pantallas, los trastornos del sueño y el estrés. Se aborda con un modelo de cuatro niveles conectados: el nivel del niño (peso al nacer, lactancia materna, hábitos de juego), el familiar (cómo comen los padres, herencia, mesa compartida, rutinas), el comunitario o meso (escuela, barrio, clubes, kioscos escolares) y el socio-político o macro (cultura, ingresos, medios, empresas de alimentos y leyes). Como las causas son múltiples y muchas están fuera del consultorio, la promoción necesita estrategias que articulen recursos dentro y fuera del sector salud."},
+ {type:"dev", topic:"F", q:"Explicá las cuatro preguntas auxiliares que propone Chapela para analizar una práctica de promoción de la salud.",
+  keys:["Sirven para evaluar si una práctica es emancipadora o reproduce esquemas dominantes","Ontológica: ¿quién es el otro? Objeto o sujeto ético","Epistemológica: ¿cómo clasifica el conocimiento? Cerrada y binaria o abierta a otras cosmovisiones","Metodológica: ¿cómo busca conocer el mundo? Cuantitativo rígido o hermenéutico y cualitativo","Ético-política: ¿para qué y para quién se ejerce el poder? Dominación o liberación comunitaria","Ejemplo aplicado a una intervención concreta"],
+  model:"Chapela propone cuatro preguntas para evaluar si una intervención es realmente emancipadora o si reproduce esquemas dominantes. La ontológica, ¿quién es el otro en esta práctica?, analiza si se trata a la persona como un objeto o un número, o como un sujeto ético capaz de construir conocimiento y definir sus normas de vida. La epistemológica, ¿cómo clasifica el conocimiento quien diseña la práctica?, distingue una clasificación cerrada y binaria, de verdades únicas positivistas, de una abierta a múltiples cosmovisiones. La metodológica, ¿cómo busca conocer el mundo?, evalúa si se impone un método cuantitativo rígido o se usan enfoques hermenéuticos y cualitativos que respetan la complejidad social. La ético-política, ¿para qué y para los fines de quién se ejerce el poder?, analiza si la autoridad profesional refuerza la dominación institucional o se pone al servicio de la liberación comunitaria y la ciudadanía autónoma. Por ejemplo, una campaña que solo ordena cambiar hábitos trata al otro como objeto y usa el poder para controlar."}
+]
+];
+
+/* ---------- Utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const half = x => Math.round(x*2)/2;
+const fmt = x => (Number.isInteger(x) ? x : x.toFixed(1)).toString().replace(".", ",");
+const LET = "abcdefgh";
+
+function pickDistinct(pool, n, used){
+  const out = [], s = shuffle(pool);
+  for (const q of s){ if (out.length<n && !used.has(q.topic)) { out.push(q); used.add(q.topic); } }
+  for (const q of s){ if (out.length<n && !out.includes(q)) out.push(q); }
+  return out;
+}
+
+/* ---------- Estado ---------- */
+
+function prep(it){
+  const o = Object.assign({}, {q:it, type:it.type, done:false, pts:0, phase:"answer", r:{}});
+  if (it.type==="mc" || it.type==="fill") o.opts = shuffle(it.o.map((t,i)=>({t, ok:i===0})));
+  if (it.type==="vf") o.st = shuffle(it.s);
+  if (it.type==="match") o.right = shuffle(it.R.map((t,i)=>({t,i})));
+  return o;
+}
+function buildExam(){
+  exam = MODELS[active].map(prep);
+  cur = 0; view = "q"; confirmFinish = false;
+}
+const saved = [];
+let active = 0;
+function switchTab(i){
+  saved[active] = {exam, cur, view, confirmFinish};
+  active = i;
+  if (saved[i]) ({exam, cur, view, confirmFinish} = saved[i]); else buildExam();
+  render(); scrollUp(true);
+}
+function temaScore(i){
+  const ex = i===active ? exam : (saved[i] && saved[i].exam);
+  if (!ex) return null;
+  const d = ex.filter(x=>x.done).length;
+  const p = half(ex.reduce((a,x)=>a+(x.done?x.pts:0),0));
+  const v = i===active ? view : saved[i].view;
+  return {d, p, finished: v==="results"};
+}
+function renderTabs(){
+  $("#tabs").innerHTML = MODELS.map((_,i)=>{
+    const s = temaScore(i);
+    let sub = "Sin empezar", c = "tab";
+    if (s && s.finished){ sub = fmt(s.p)+"/100 · "+(s.p>=60?"aprobado":"desaprobado"); c += s.p>=60?" pass":" fail"; }
+    else if (s && s.d) sub = s.d+"/10 corregidas";
+    if (i===active) c += " on";
+    return `<button class="${c}" data-tab="${i}" aria-current="${i===active}"><b>Tema ${i+1}</b><span>${sub}</span></button>`;
+  }).join("");
+}
+
+/* ---------- Progreso ---------- */
+function renderProgress(){
+  renderTabs();
+  $("#cells").innerHTML = exam.map((it,i) => {
+    let c = "cell";
+    if (it.done) c += it.pts >= 6 ? " ok" : " bad";
+    else if (it.phase === "self") c += " pend";
+    if (view==="q" && i===cur) c += " cur";
+    return `<button class="${c}" data-go="${i}" aria-label="Consigna ${i+1}">${i+1}</button>`;
+  }).join("");
+  const done = exam.filter(x=>x.done).length;
+  const pts = exam.reduce((a,x)=>a+(x.done?x.pts:0),0);
+  $("#pstatus").textContent = view==="results" ? "Parcial entregado" : `${done} de 10 consignas corregidas`;
+  $("#pscore").textContent = `${fmt(half(pts))} / ${done*10} pts`;
+}
+
+/* ---------- Render de consignas ---------- */
+function render(){
+  renderProgress();
+  if (view === "results") return renderResults();
+  const it = exam[cur], q = it.q;
+  const locked = it.done || it.phase === "self";
+  let body = "";
+  if (it.type==="mc") body = renderMC(it, locked);
+  if (it.type==="vf") body = renderVF(it, locked);
+  if (it.type==="match") body = renderMatch(it, locked);
+  if (it.type==="fill") body = renderFill(it, locked);
+  if (it.type==="dev") body = renderDev(it, locked);
+
+  const last = cur === exam.length-1;
+  const canCheck = !it.done && it.phase==="answer";
+  $("#stage").innerHTML = `
+  <section class="sheet ${locked?"locked":""}">
+    <div class="qhead">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span class="qnum">Tema ${active+1} · Consigna ${cur+1}</span>
+        <span class="qtag">${TYPES[it.type]} · ${TOPICS[q.topic]}</span>
+      </div>
+      <span class="qpts">${it.done ? fmt(it.pts)+" / 10 pts" : "10 pts"}</span>
+    </div>
+    ${body}
+    <p class="msg" id="msg" hidden></p>
+    ${confirmFinish ? confirmBox() : ""}
+    <div class="actions">
+      <div class="grp">
+        <button class="btn" data-act="prev" ${cur===0?"disabled":""}>Anterior</button>
+        ${canCheck ? `<button class="btn primary" data-act="check">${it.type==="dev" ? "Ver respuesta modelo" : "Corregir"}</button>` : ""}
+        ${it.phase==="self" && !it.done ? `<button class="btn primary" data-act="self">Confirmar autoevaluación</button>` : ""}
+      </div>
+      <div class="grp">
+        ${last ? `<button class="btn ${allDone()?"primary":""}" data-act="finish">Entregar parcial</button>` : `<button class="btn ${it.done?"primary":""}" data-act="next">Siguiente</button>`}
+      </div>
+    </div>
+  </section>`;
+  if (it.type==="match") requestAnimationFrame(drawLines);
+}
+
+function renderMC(it, locked){
+  return `<p class="prompt">${esc(it.q.q)}</p>
+  <div class="opts" role="radiogroup">${it.opts.map((o,i)=>{
+    let c = "opt";
+    if (it.done){ if (o.ok) c+=" right"; else if (it.r.sel===i) c+=" wrong"; }
+    else if (it.r.sel===i) c+=" sel";
+    return `<label class="${c}"><input type="radio" name="mc" value="${i}" ${it.r.sel===i?"checked":""} ${locked?"disabled":""}><span class="key">${LET[i]}</span><span>${esc(o.t)}</span></label>`;
+  }).join("")}</div>
+  ${it.done ? `<div class="feedback ${it.pts?"ok":"bad"}"><h3>${it.pts?"Correcta":"Incorrecta"}</h3><p>${esc(it.q.e)}</p></div>` : ""}`;
+}
+
+function renderVF(it, locked){
+  const vals = it.r.v || {};
+  return `<p class="prompt">${esc(it.q.q)}</p><p class="hint">Cada afirmación vale 2,5 puntos.</p>
+  <div class="vf">${it.st.map((s,i)=>{
+    let c = "vfrow";
+    if (it.done) c += vals[i]===s[1] ? " right" : " wrong";
+    return `<div class="${c}"><p>${esc(s[0])}</p>
+      <div class="vfbtns" role="group" aria-label="Afirmación ${i+1}">
+        <button class="vfb ${vals[i]===true?"on":""}" data-vf="${i}" data-val="1" ${locked?"disabled":""} aria-pressed="${vals[i]===true}">V</button>
+        <button class="vfb ${vals[i]===false?"on":""}" data-vf="${i}" data-val="0" ${locked?"disabled":""} aria-pressed="${vals[i]===false}">F</button>
+      </div>
+      ${it.done ? `<p class="vfexp"><b>${s[1]?"Verdadera":"Falsa"}.</b> ${esc(s[2])}</p>` : ""}
+    </div>`;}).join("")}</div>`;
+}
+
+function renderMatch(it, locked){
+  const pairs = it.r.p || {};
+  const linkedR = new Set(Object.values(pairs));
+  let fb = "";
+  if (it.done){
+    const n = it.q.L.length, ok = it.q.L.filter((_,i)=>pairs[i]===i).length;
+    fb = `<div class="feedback ${it.pts>=6?"ok":"bad"}"><h3>${ok} de ${n} uniones correctas</h3>
+      <ul>${it.q.L.map((l,i)=>`<li><b>${esc(l)}</b>: ${esc(it.q.R[i])}</li>`).join("")}</ul></div>`;
+  }
+  return `<p class="prompt">${esc(it.q.q)}</p>
+  <p class="hint">Tocá un elemento de la izquierda y después su par de la derecha. Tocá uno ya unido para deshacer la flecha.</p>
+  <div class="match" id="match">
+    <svg id="msvg" aria-hidden="true"></svg>
+    <div class="mcol">${it.q.L.map((l,i)=>`<button class="mitem ${it.r.pick===i?"picked":""} ${pairs[i]!==undefined?"linked":""}" data-ml="${i}" ${locked?"disabled":""}><span class="lt">${i+1}</span>${esc(l)}</button>`).join("")}</div>
+    <div class="mcol">${it.right.map((r,j)=>`<button class="mitem ${linkedR.has(r.i)?"linked":""}" data-mr="${r.i}" ${locked?"disabled":""}><span class="lt">${LET[j]}</span>${esc(r.t)}</button>`).join("")}</div>
+  </div>${fb}`;
+}
+
+function drawLines(){
+  const box = $("#match"), svg = $("#msvg");
+  if (!box || !svg) return;
+  const it = exam[cur], pairs = it.r.p || {};
+  const c = box.getBoundingClientRect();
+  let out = "";
+  for (const [li, ri] of Object.entries(pairs)){
+    const a = box.querySelector(`[data-ml="${li}"]`), b = box.querySelector(`[data-mr="${ri}"]`);
+    if (!a || !b) continue;
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    const x1 = ra.right - c.left, y1 = ra.top + ra.height/2 - c.top;
+    const x2 = rb.left - c.left - 2, y2 = rb.top + rb.height/2 - c.top;
+    const dx = (x2-x1)/2;
+    const cls = it.done ? (Number(li)===Number(ri) ? "ok" : "bad") : "";
+    out += `<path class="${cls}" d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2-7},${y2}"/>`;
+    out += `<polygon class="${cls}" points="${x2},${y2} ${x2-8},${y2-5} ${x2-8},${y2+5}"/>`;
+    out += `<circle cx="${x1}" cy="${y1}" r="3.5" fill="var(--${cls==="ok"?"ok":cls==="bad"?"bad":"accent"})"/>`;
+  }
+  svg.innerHTML = out;
+}
+
+function renderFill(it, locked){
+  const sel = it.r.sel;
+  const chosen = sel!==undefined ? it.opts[sel] : null;
+  let blankCls = "blank";
+  if (it.done || it.phase==="self") blankCls += chosen && chosen.ok ? " right" : " wrong";
+  const correctOpt = it.opts.find(o=>o.ok);
+  let fb = "";
+  if (it.phase==="self" || it.done){
+    const optOk = chosen && chosen.ok;
+    if (!optOk){
+      fb = `<div class="feedback bad"><h3>Opción incorrecta · 0 / 10</h3><p>La opción correcta es <b>${esc(correctOpt.t)}</b>. Con la opción equivocada la justificación no suma.</p><div class="model">${esc(it.q.model)}</div></div>`;
+    } else {
+      const ck = it.r.ck || {};
+      fb = `<div class="feedback ${it.done?(it.pts>=6?"ok":"bad"):"info"}">
+        <h3>Opción correcta · 5 pts. ${it.done ? "Justificación: "+fmt(it.pts-5)+" / 5" : "Ahora autoevaluá tu justificación"}</h3>
+        <div class="model">${esc(it.q.model)}</div>
+        <p>Marcá las ideas clave que aparecen en tu justificación:</p>
+        <div class="checks">${it.q.keys.map((k,i)=>`<label class="check"><input type="checkbox" data-ck="${i}" ${ck[i]?"checked":""} ${it.done?"disabled":""}><span>${esc(k)}</span></label>`).join("")}</div>
+      </div>`;
+    }
+  }
+  return `<p class="prompt">Completá con la opción correcta y justificá tu elección.</p>
+  <p class="fill">${esc(it.q.before)} <span class="${blankCls}">${chosen?esc(chosen.t):"&nbsp;"}</span> ${esc(it.q.after)}</p>
+  <div class="chips">${it.opts.map((o,i)=>{
+    let c = "chip";
+    if (it.done || it.phase==="self"){ if (o.ok) c+=" right"; else if (sel===i) c+=" wrong"; }
+    else if (sel===i) c+=" on";
+    return `<button class="${c}" data-fo="${i}" ${locked?"disabled":""}>${esc(o.t)}</button>`;}).join("")}</div>
+  <div class="field"><label class="fl" for="just">Justificación</label>
+    <textarea id="just" ${locked?"readonly":""} placeholder="Explicá por qué elegiste esa opción…">${esc(it.r.text||"")}</textarea>
+    <span class="count" id="cnt">${(it.r.text||"").trim().length} caracteres</span></div>
+  ${fb}`;
+}
+
+function renderDev(it, locked){
+  let fb = "";
+  if (it.phase==="self" || it.done){
+    const ck = it.r.ck || {};
+    fb = `<div class="feedback ${it.done?(it.pts>=6?"ok":"bad"):"info"}">
+      <h3>${it.done ? "Autoevaluación: "+fmt(it.pts)+" / 10" : "Respuesta modelo"}</h3>
+      <div class="model">${esc(it.q.model)}</div>
+      <p>Marcá con honestidad las ideas clave que desarrollaste. Cada una vale ${fmt(half(10/it.q.keys.length*100)/100)} pts aprox.</p>
+      <div class="checks">${it.q.keys.map((k,i)=>`<label class="check"><input type="checkbox" data-ck="${i}" ${ck[i]?"checked":""} ${it.done?"disabled":""}><span>${esc(k)}</span></label>`).join("")}</div>
+    </div>`;
+  }
+  return `<p class="prompt">${esc(it.q.q)}</p>
+  <div class="field"><label class="fl" for="devt">Tu respuesta</label>
+    <textarea id="devt" style="min-height:200px" ${locked?"readonly":""} placeholder="Desarrollá como lo harías en el parcial…">${esc(it.r.text||"")}</textarea>
+    <span class="count" id="cnt">${(it.r.text||"").trim().length} caracteres</span></div>
+  ${fb}`;
+}
+
+/* ---------- Corrección ---------- */
+function showMsg(t){ const m = $("#msg"); if (m){ m.textContent = t; m.hidden = false; } }
+
+function check(){
+  const it = exam[cur];
+  if (it.type==="mc"){
+    if (it.r.sel===undefined) return showMsg("Elegí una opción antes de corregir.");
+    it.pts = it.opts[it.r.sel].ok ? 10 : 0; it.done = true;
+  }
+  if (it.type==="vf"){
+    const v = it.r.v || {};
+    if (Object.keys(v).length < it.st.length) return showMsg("Marcá V o F en todas las afirmaciones.");
+    it.pts = it.st.reduce((a,s,i)=>a + (v[i]===s[1] ? 2.5 : 0), 0); it.done = true;
+  }
+  if (it.type==="match"){
+    const p = it.r.p || {};
+    if (Object.keys(p).length < it.q.L.length) return showMsg("Uní todos los elementos antes de corregir.");
+    const ok = it.q.L.filter((_,i)=>p[i]===i).length;
+    it.pts = half(10*ok/it.q.L.length); it.done = true; it.r.pick = undefined;
+  }
+  if (it.type==="fill"){
+    if (it.r.sel===undefined) return showMsg("Elegí la opción que completa la frase.");
+    if ((it.r.text||"").trim().length < 30) return showMsg("Escribí una justificación de al menos un par de oraciones.");
+    if (it.opts[it.r.sel].ok){ it.phase = "self"; it.r.ck = {}; }
+    else { it.pts = 0; it.done = true; it.phase = "self"; }
+  }
+  if (it.type==="dev"){
+    if ((it.r.text||"").trim().length < 120) return showMsg("Desarrollá un poco más tu respuesta antes de ver el modelo.");
+    it.phase = "self"; it.r.ck = {};
+  }
+  render();
+}
+
+function confirmSelf(){
+  const it = exam[cur], ck = it.r.ck || {};
+  const n = it.q.keys.length, k = Object.values(ck).filter(Boolean).length;
+  it.pts = it.type==="fill" ? 5 + half(5*k/n) : half(10*k/n);
+  it.done = true; render();
+}
+
+function allDone(){ return exam.every(x=>x.done); }
+function confirmBox(){
+  const left = exam.filter(x=>!x.done).length;
+  return `<div class="confirm"><span>Te ${left===1?"queda 1 consigna":"quedan "+left+" consignas"} sin corregir. Al entregar, cuentan 0 puntos.</span>
+    <div class="grp" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" data-act="forcefinish">Entregar igual</button><button class="btn" data-act="cancelfinish">Seguir respondiendo</button></div></div>`;
+}
+
+/* ---------- Resultados ---------- */
+function renderResults(){
+  const total = half(exam.reduce((a,x)=>a+(x.done?x.pts:0),0));
+  const pass = total >= 60;
+  const byTopic = {}, byType = {};
+  exam.forEach(x => {
+    const t = x.q.topic; byTopic[t] = byTopic[t] || [0,0]; byTopic[t][0] += x.done?x.pts:0; byTopic[t][1] += 10;
+    byType[x.type] = byType[x.type] || [0,0]; byType[x.type][0] += x.done?x.pts:0; byType[x.type][1] += 10;
+  });
+  const bars = (obj, names) => Object.entries(obj).map(([k,[p,m]]) => {
+    const pct = p/m*100;
+    return `<div class="bar"><span>${esc(names[k])}</span><span class="v">${fmt(half(p))}/${m}</span><span class="track"><i class="${pct<60?"low":""}" style="width:${pct}%"></i></span></div>`;
+  }).join("");
+  const weak = Object.entries(byTopic).filter(([k,[p,m]])=>p/m<0.6).map(([k])=>TOPICS[k]);
+  $("#stage").innerHTML = `
+  <section class="sheet">
+    <div class="result-top">
+      <span class="qtag">Tema ${active+1}</span><div class="bigscore">${fmt(total)}<small> / 100</small></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span class="verdict ${pass?"ok":"bad"}">${pass?"Aprobado":"Desaprobado"}</span>
+        <span style="font-size:15px;color:var(--muted)">${pass ? "Superaste el 60% requerido." : "Te faltaron "+fmt(half(60-total))+" puntos para llegar al 60%."}</span>
+      </div>
+    </div>
+    ${weak.length ? `<div class="feedback bad"><h3>Temas para repasar</h3><p>${weak.map(esc).join(" · ")}</p></div>` : `<div class="feedback ok"><h3>Todos los temas sobre el 60%</h3><p>Seguí con otro tema para practicar consignas distintas.</p></div>`}
+    <h2>Por tema</h2><div class="bars">${bars(byTopic, TOPICS)}</div>
+    <h2>Por tipo de consigna</h2><div class="bars">${bars(byType, TYPES)}</div>
+    <h2>Consigna por consigna</h2>
+    <div class="review">${exam.map((x,i)=>`<button class="rv" data-go="${i}"><span class="n">${i+1}</span><span>${TYPES[x.type]} · ${esc(TOPICS[x.q.topic])}</span><span class="p ${x.done&&x.pts>=6?"ok":"bad"}">${x.done?fmt(x.pts):"0"}/10</span></button>`).join("")}</div>
+    <div class="actions"><span></span><div class="grp"><button class="btn" data-act="review">Revisar respuestas</button><button class="btn primary" data-act="restart">Reiniciar este tema</button></div></div>
+  </section>`;
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, input");
+  if (!t) return;
+  const it = exam[cur];
+  if (t.dataset.tab !== undefined){ switchTab(+t.dataset.tab); return; }
+  if (t.dataset.go !== undefined){ cur = +t.dataset.go; view = "q"; confirmFinish = false; render(); scrollUp(); return; }
+  const act = t.dataset.act;
+  if (act==="prev"){ cur--; confirmFinish=false; render(); scrollUp(); return; }
+  if (act==="next"){ cur++; confirmFinish=false; render(); scrollUp(); return; }
+  if (act==="check") return check();
+  if (act==="self") return confirmSelf();
+  if (act==="finish"){ if (allDone()){ view="results"; render(); scrollUp(); } else { confirmFinish = true; render(); } return; }
+  if (act==="forcefinish"){ confirmFinish=false; view="results"; render(); scrollUp(); return; }
+  if (act==="cancelfinish"){ confirmFinish=false; const i = exam.findIndex(x=>!x.done); cur = i<0?cur:i; render(); scrollUp(); return; }
+  if (act==="review"){ cur=0; view="q"; render(); scrollUp(); return; }
+  if (act==="restart"){ buildExam(); render(); scrollUp(); return; }
+  if (view!=="q" || it.done || it.phase!=="answer") return;
+  if (t.dataset.vf !== undefined){ it.r.v = it.r.v || {}; it.r.v[t.dataset.vf] = t.dataset.val==="1"; render(); return; }
+  if (t.dataset.fo !== undefined){ it.r.sel = +t.dataset.fo; render(); return; }
+  if (t.dataset.ml !== undefined){
+    const i = +t.dataset.ml; it.r.p = it.r.p || {};
+    if (it.r.p[i] !== undefined && it.r.pick !== i){ delete it.r.p[i]; it.r.pick = undefined; }
+    else it.r.pick = it.r.pick===i ? undefined : i;
+    render(); return;
+  }
+  if (t.dataset.mr !== undefined){
+    const r = +t.dataset.mr; it.r.p = it.r.p || {};
+    if (it.r.pick === undefined){
+      const owner = Object.keys(it.r.p).find(k=>it.r.p[k]===r);
+      if (owner !== undefined) delete it.r.p[owner];
+      render(); return;
+    }
+    for (const k of Object.keys(it.r.p)) if (it.r.p[k]===r) delete it.r.p[k];
+    it.r.p[it.r.pick] = r; it.r.pick = undefined; render(); return;
+  }
+});
+document.addEventListener("change", e => {
+  const it = exam[cur];
+  if (e.target.name==="mc" && !it.done){ it.r.sel = +e.target.value; render(); }
+  if (e.target.dataset.ck !== undefined && !it.done){ it.r.ck = it.r.ck || {}; it.r.ck[e.target.dataset.ck] = e.target.checked; }
+});
+document.addEventListener("input", e => {
+  if (e.target.id==="just" || e.target.id==="devt"){
+    exam[cur].r.text = e.target.value;
+    const c = $("#cnt"); if (c) c.textContent = e.target.value.trim().length + " caracteres";
+  }
+});
+window.addEventListener("resize", () => { if (view==="q" && exam[cur].type==="match") drawLines(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ if (view==="q" && exam[cur] && exam[cur].type==="match") drawLines(); });
+function scrollUp(force){ const s = $("#stage"); if (s && (s.getBoundingClientRect().top < 0 || force)) window.scrollTo({top: window.scrollY + s.getBoundingClientRect().top - 110}); }
+
+let exam = [], cur = 0, view = "q", confirmFinish = false;
+const h = (location.hash.match(/^#tema([1-4])$/)||[])[1];
+active = h ? +h-1 : 0;
+buildExam(); render();
+</script>
+
+</body></html>
